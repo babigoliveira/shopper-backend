@@ -6,7 +6,8 @@ import {
 } from './domain/dtos/image-upload.dto';
 import { ZodValidationPipe } from './zod-validation-pipe';
 import { createImageUploadRequestDtoSchema } from './domain/validators/image-upload-validators';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ErrorResponseDto } from './domain/dtos/error-response.dto';
 
 @Controller()
 export class AppController {
@@ -16,6 +17,13 @@ export class AppController {
   @HttpCode(200)
   @ApiOkResponse({
     type: ImageUploadResponseDto,
+  })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+    example: {
+      error_code: 'INVALID_DATA',
+      error_description: 'Invalid base64 image string',
+    } satisfies ErrorResponseDto,
   })
   @UsePipes(new ZodValidationPipe(createImageUploadRequestDtoSchema))
   uploadImage(@Body() body: ImageUploadRequestDto): ImageUploadResponseDto {
