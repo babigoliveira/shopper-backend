@@ -26,11 +26,16 @@ export class AppController {
     } satisfies ErrorResponseDto,
   })
   @UsePipes(new ZodValidationPipe(createImageUploadRequestDtoSchema))
-  uploadImage(@Body() body: ImageUploadRequestDto): ImageUploadResponseDto {
+  async uploadImage(
+    @Body() body: ImageUploadRequestDto,
+  ): Promise<ImageUploadResponseDto> {
+    const { uploadResult, queryResult } =
+      await this.appService.uploadImageAndQueryGeminiReading(body);
+
     return {
-      image_url: '',
+      image_url: uploadResult.file.uri,
       measure_uuid: '',
-      measure_value: 0,
+      measure_value: parseFloat(queryResult.response.text()),
     };
   }
 }
