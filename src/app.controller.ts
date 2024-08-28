@@ -29,13 +29,13 @@ export class AppController {
   async uploadImage(
     @Body() body: ImageUploadRequestDto,
   ): Promise<ImageUploadResponseDto> {
-    const { uploadResult, queryResult } =
+    const { image_url, measure_uuid, measure_value } =
       await this.appService.uploadImageAndQueryGeminiReading(body);
 
     return {
-      image_url: uploadResult.file.uri,
-      measure_uuid: '',
-      measure_value: parseFloat(queryResult.response.text()),
+      image_url,
+      measure_uuid,
+      measure_value,
     };
   }
 }

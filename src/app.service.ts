@@ -2,13 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { FileSystemService } from './file-system.service';
 import { GeminiService } from './gemini.service';
 import { ImageUploadRequestDto } from './domain/dtos/image-upload.dto';
-import { IMAGE_MIME_TYPES_TO_EXTENSION } from './constants';
+import {
+  IMAGE_MIME_TYPES_TO_EXTENSION,
+  MIME_TYPES_SIGNATURES,
+} from './constants';
+import { MeasureService } from './infra/measure/measure.service';
 
 @Injectable()
 export class AppService {
   constructor(
     private readonly fsService: FileSystemService,
     private readonly geminiService: GeminiService,
+    private readonly measureService: MeasureService,
   ) {}
 
   async uploadImageAndQueryGeminiReading({
@@ -31,10 +36,13 @@ export class AppService {
 
     // TODO: remover imagem após upload
 
-    return {
-      uploadResult: uploadResponse,
-      queryResult: result,
-    };
+    const measure = await this.measureService.create({
+      image_url: uploadResponse.file.uri,
+      measure_value: parseFloat(result.response.text()),
+      measure_datetime,
+    });
+
+    return measure;
   }
 
   private makeFilePath(
@@ -44,7 +52,7 @@ export class AppService {
   ) {
     const mimeType = this.getMimeType(image);
     const extension = IMAGE_MIME_TYPES_TO_EXTENSION.get(mimeType);
-    const filePath = `./${customerCode}_${measureDatetime.toISOString()}.${extension}`;
+    const filePath = `./${customerCode}_${measureDatetime.toISOString()}${extension}`;
     return filePath;
   }
 
@@ -53,6 +61,12 @@ export class AppService {
 
     if (matches && matches.length > 1) {
       return matches[1];
+    }
+
+    for (const [signature, mimeType] of MIME_TYPES_SIGNATURES.entries()) {
+      if (base64.startsWith(signature)) {
+        return mimeType;
+      }
     }
 
     return '';
