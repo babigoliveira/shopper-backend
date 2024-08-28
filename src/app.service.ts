@@ -8,6 +8,9 @@ import {
 } from './constants';
 import { MeasureService } from './infra/measure/measure.service';
 import { ConfirmMeasureRequestDto } from './domain/dtos/confirm-measure.dto';
+import { DuplicatedMeasureAttemptError } from './domain/errors';
+import { format } from 'date-fns';
+import { MEASURE_YEAR_MONTH_FORMAT } from './domain/schemas/measure.schema';
 
 @Injectable()
 export class AppService {
@@ -17,11 +20,20 @@ export class AppService {
     private readonly measureService: MeasureService,
   ) {}
 
-  async uploadImageAndQueryGeminiReading({
-    customer_code,
-    image,
-    measure_datetime,
-  }: ImageUploadRequestDto) {
+  async ensureMeasureDoesNotExists(uploadRequest: ImageUploadRequestDto) {
+    const measure = await this.measureService.findMeasure(uploadRequest);
+
+    if (measure != null) {
+      throw new DuplicatedMeasureAttemptError();
+    }
+  }
+
+  async uploadImageAndQueryGeminiReading(uploadRequest: ImageUploadRequestDto) {
+    const { customer_code, image, measure_datetime, measure_type } =
+      uploadRequest;
+
+    await this.ensureMeasureDoesNotExists(uploadRequest);
+
     const filePath = this.makeFilePath(image, customer_code, measure_datetime);
     this.fsService.store(filePath, image);
 
@@ -41,6 +53,8 @@ export class AppService {
       image_url: uploadResponse.file.uri,
       measure_value: parseFloat(result.response.text()),
       measure_datetime,
+      measure_type,
+      customer_code,
     });
 
     return measure;
@@ -53,7 +67,8 @@ export class AppService {
   ) {
     const mimeType = this.getMimeType(image);
     const extension = IMAGE_MIME_TYPES_TO_EXTENSION.get(mimeType);
-    const filePath = `./${customerCode}_${measureDatetime.toISOString()}${extension}`;
+    const timestamp = format(measureDatetime, MEASURE_YEAR_MONTH_FORMAT);
+    const filePath = `./${customerCode}_${timestamp}${extension}`;
     return filePath;
   }
 

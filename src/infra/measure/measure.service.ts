@@ -1,12 +1,17 @@
 import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Measure } from '../../domain/schemas/measure.schema';
+import {
+  Measure,
+  MEASURE_YEAR_MONTH_FORMAT,
+} from '../../domain/schemas/measure.schema';
 import { CreateMeasureDto } from './create-measure.dto';
 import {
   MeasureAlreadyValidatedError,
   MeasureNotFoundError,
 } from '../../domain/errors';
+import { format } from 'date-fns';
+import { ImageUploadRequestDto } from '../../domain/dtos/image-upload.dto';
 
 @Injectable()
 export class MeasureService {
@@ -41,5 +46,17 @@ export class MeasureService {
     const saved = await measure.save();
 
     return saved;
+  }
+
+  async findMeasure({
+    customer_code,
+    measure_type,
+    measure_datetime,
+  }: ImageUploadRequestDto): Promise<Measure | null> {
+    return this.measureModel.findOne({
+      customer_code,
+      measure_type,
+      measure_year_month: format(measure_datetime, MEASURE_YEAR_MONTH_FORMAT),
+    });
   }
 }

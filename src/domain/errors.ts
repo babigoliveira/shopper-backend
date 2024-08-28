@@ -9,3 +9,9 @@ export class MeasureNotFoundError extends Error {
     super(`Leitura do mês não encontrada ${measureUuid}`);
   }
 }
+
+export class DuplicatedMeasureAttemptError extends Error {
+  constructor() {
+    super('Leitura do mês já realizada');
+  }
+}

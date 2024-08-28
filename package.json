@@ -26,6 +26,7 @@
     "@nestjs/mongoose": "^10.0.10",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.4.0",
+    "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "is-base64": "^1.1.0",
     "mongoose": "^8.5.4",

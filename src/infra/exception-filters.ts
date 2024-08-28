@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { Response } from 'express';
 import {
+  DuplicatedMeasureAttemptError,
   MeasureAlreadyValidatedError,
   MeasureNotFoundError,
 } from '../domain/errors';
@@ -15,6 +16,8 @@ export const getExceptionFilters = (): (new (
   ),
 
   registerExceptionFilter(MeasureNotFoundError, 404, 'MEASURE_NOT_FOUND'),
+
+  registerExceptionFilter(DuplicatedMeasureAttemptError, 409, 'DOUBLE_REPORT'),
 ];
 
 const registerExceptionFilter = (

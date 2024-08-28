@@ -44,6 +44,13 @@ export class AppController {
       error_description: 'Invalid base64 image string',
     } satisfies ErrorResponseDto,
   })
+  @ApiConflictResponse({
+    type: ErrorResponseDto,
+    example: {
+      error_code: 'DOUBLE_REPORT',
+      error_description: 'Leitura do mês já realizada',
+    } satisfies ErrorResponseDto,
+  })
   @UsePipes(new ZodValidationPipe(createImageUploadRequestDtoSchema))
   async uploadImage(
     @Body() body: ImageUploadRequestDto,
