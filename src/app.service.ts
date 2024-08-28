@@ -7,6 +7,7 @@ import {
   MIME_TYPES_SIGNATURES,
 } from './constants';
 import { MeasureService } from './infra/measure/measure.service';
+import { ConfirmMeasureRequestDto } from './domain/dtos/confirm-measure.dto';
 
 @Injectable()
 export class AppService {
@@ -70,5 +71,12 @@ export class AppService {
     }
 
     return '';
+  }
+
+  confirmMeasure(confirmDto: ConfirmMeasureRequestDto) {
+    return this.measureService.confirm(
+      confirmDto.measure_uuid,
+      confirmDto.confirmed_value,
+    );
   }
 }

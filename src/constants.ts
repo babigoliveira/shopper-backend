@@ -1,7 +1,4 @@
-export const RECT_IMAGE_BASE_64 =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA' +
-  'AgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAA' +
-  'DklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII';
+import * as fs from 'node:fs';
 
 export const IMAGE_MIME_TYPES_TO_EXTENSION = new Map([
   ['image/png', '.png'],
@@ -25,3 +22,7 @@ export const IMAGE_EXTENSIONS_TO_MIME_TYPE = new Map([
   ['.heic', 'image/heic'],
   ['.heif', 'image/heif'],
 ]);
+
+export const MEASURE_IMAGE_BASE_64_EXAMPLE = fs
+  .readFileSync('static/measure-image-base64-example.txt')
+  .toString();
