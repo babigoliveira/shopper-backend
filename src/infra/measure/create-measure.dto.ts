@@ -1,9 +1,9 @@
-import { MEASURE_TYPES } from '../../domain/dtos/image-upload.dto';
+import { MeasureType } from '../../domain/dtos/image-upload.dto';
 
 export class CreateMeasureDto {
   customer_code: string;
   image_url: string;
   measure_value: number;
   measure_datetime: Date;
-  measure_type: (typeof MEASURE_TYPES)[number];
+  measure_type: MeasureType;
 }

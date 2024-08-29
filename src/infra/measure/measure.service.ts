@@ -11,7 +11,10 @@ import {
   MeasureNotFoundError,
 } from '../../domain/errors';
 import { format } from 'date-fns';
-import { ImageUploadRequestDto } from '../../domain/dtos/image-upload.dto';
+import {
+  ImageUploadRequestDto,
+  MeasureType,
+} from '../../domain/dtos/image-upload.dto';
 
 @Injectable()
 export class MeasureService {
@@ -58,5 +61,17 @@ export class MeasureService {
       measure_type,
       measure_year_month: format(measure_datetime, MEASURE_YEAR_MONTH_FORMAT),
     });
+  }
+
+  async filterMeasures(customerCode: string, measureType?: MeasureType) {
+    const filter: Partial<Measure> = {
+      customer_code: customerCode,
+    };
+
+    if (measureType) {
+      filter.measure_type = measureType;
+    }
+
+    return this.measureModel.find(filter);
   }
 }

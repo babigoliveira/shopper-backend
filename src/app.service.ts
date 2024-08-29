@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { FileSystemService } from './file-system.service';
 import { GeminiService } from './gemini.service';
-import { ImageUploadRequestDto } from './domain/dtos/image-upload.dto';
+import {
+  ImageUploadRequestDto,
+  MeasureType,
+} from './domain/dtos/image-upload.dto';
 import {
   IMAGE_MIME_TYPES_TO_EXTENSION,
   MIME_TYPES_SIGNATURES,
@@ -93,5 +96,9 @@ export class AppService {
       confirmDto.measure_uuid,
       confirmDto.confirmed_value,
     );
+  }
+
+  async filterMeasures(customerCode: string, measureType: MeasureType) {
+    return this.measureService.filterMeasures(customerCode, measureType);
   }
 }

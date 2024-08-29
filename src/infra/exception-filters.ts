@@ -4,6 +4,7 @@ import {
   DuplicatedMeasureAttemptError,
   MeasureAlreadyValidatedError,
   MeasureNotFoundError,
+  MeasuresNotFoundError,
 } from '../domain/errors';
 
 export const getExceptionFilters = (): (new (
@@ -18,6 +19,8 @@ export const getExceptionFilters = (): (new (
   registerExceptionFilter(MeasureNotFoundError, 404, 'MEASURE_NOT_FOUND'),
 
   registerExceptionFilter(DuplicatedMeasureAttemptError, 409, 'DOUBLE_REPORT'),
+
+  registerExceptionFilter(MeasuresNotFoundError, 404, 'MEASURES_NOT_FOUND'),
 ];
 
 const registerExceptionFilter = (

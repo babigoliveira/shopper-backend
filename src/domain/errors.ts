@@ -15,3 +15,9 @@ export class DuplicatedMeasureAttemptError extends Error {
     super('Leitura do mês já realizada');
   }
 }
+
+export class MeasuresNotFoundError extends Error {
+  constructor() {
+    super('Nenhuma leitura encontrada');
+  }
+}

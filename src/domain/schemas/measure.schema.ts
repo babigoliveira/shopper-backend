@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { HydratedDocument } from 'mongoose';
 import { format } from 'date-fns';
-import { MEASURE_TYPES } from '../dtos/image-upload.dto';
+import { MeasureType, MEASURE_TYPES } from '../dtos/image-upload.dto';
 
 export type MeasureDocument = HydratedDocument<Measure>;
 
@@ -38,7 +38,7 @@ export class Measure {
   validated: boolean;
 
   @Prop({ type: mongoose.Schema.Types.String, enum: MEASURE_TYPES })
-  measure_type: (typeof MEASURE_TYPES)[number];
+  measure_type: MeasureType;
 }
 
 export const MeasureSchema = SchemaFactory.createForClass(Measure);

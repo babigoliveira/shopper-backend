@@ -7,6 +7,6 @@ export const confirmMeasureRequestDtoSchema = z
   })
   .required();
 
-export type confirmMeasureRequestDtoSchema = z.infer<
+export type ConfirmMeasureRequestDtoSchema = z.infer<
   typeof confirmMeasureRequestDtoSchema
 >;
