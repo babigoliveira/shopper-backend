@@ -12,6 +12,7 @@ import { MEASURE_TYPES } from '../src/domain/dtos/image-upload.dto';
 jest.mock('node:fs', () => ({
   readFileSync: jest.fn().mockReturnValue(''),
   writeFileSync: jest.fn(),
+  rmSync: jest.fn(),
 }));
 
 const ENCODED_BASE64_SQUARE_IMAGE =
@@ -300,23 +301,29 @@ describe('AppController (e2e)', () => {
   });
 
   it('filters all measures', async () => {
-    const createdMeasures = await Promise.all(
-      MEASURE_TYPES.map((measureType) =>
-        measureService.create({
-          customer_code: '123',
-          measure_type: measureType,
-          measure_datetime: new Date(),
-          image_url: faker.internet.url(),
-          measure_value: 0,
-        }),
-      ),
-    );
+    const gasMeasure = await measureService.create({
+      customer_code: '123',
+      measure_type: 'GAS',
+      measure_datetime: faker.date.anytime(),
+      image_url: faker.internet.url(),
+      measure_value: faker.number.int({ min: 0 }),
+    });
+
+    const waterMeasure = await measureService.create({
+      customer_code: '123',
+      measure_type: 'WATER',
+      measure_datetime: faker.date.anytime(),
+      image_url: faker.internet.url(),
+      measure_value: faker.number.int({ min: 0 }),
+    });
+
+    const createdMeasures = [gasMeasure, waterMeasure];
 
     return request(app.getHttpServer())
       .get('/123/list')
       .expect(200)
       .expect((res) => {
-        expect(res.body.measures).toHaveLength(MEASURE_TYPES.length);
+        expect(res.body.measures).toHaveLength(createdMeasures.length);
 
         expect(res.body).toStrictEqual({
           customer_code: '123',
