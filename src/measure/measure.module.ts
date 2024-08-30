@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Measure, MeasureSchema } from '../../domain/schemas/measure.schema';
 import { MeasureService } from './measure.service';
+import { Measure, MeasureSchema } from '../domain/schemas/measure.schema';
 
 @Module({
   imports: [

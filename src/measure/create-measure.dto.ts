@@ -1,4 +1,4 @@
-import { MeasureType } from '../../domain/dtos/image-upload.dto';
+import { MeasureType } from '../domain/dtos/image-upload.dto';
 
 export class CreateMeasureDto {
   customer_code: string;

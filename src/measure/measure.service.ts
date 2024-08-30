@@ -4,17 +4,17 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
   Measure,
   MEASURE_YEAR_MONTH_FORMAT,
-} from '../../domain/schemas/measure.schema';
+} from '../domain/schemas/measure.schema';
 import { CreateMeasureDto } from './create-measure.dto';
 import {
   MeasureAlreadyValidatedError,
   MeasureNotFoundError,
-} from '../../domain/errors';
+} from '../domain/errors';
 import { format } from 'date-fns';
 import {
   ImageUploadRequestDto,
   MeasureType,
-} from '../../domain/dtos/image-upload.dto';
+} from '../domain/dtos/image-upload.dto';
 
 @Injectable()
 export class MeasureService {

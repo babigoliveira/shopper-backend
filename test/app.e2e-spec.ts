@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
+import * as mongoose from 'mongoose';
+import { MONGODB_CONNECTION_URI } from '../src/env';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -20,7 +22,18 @@ describe('AppController (e2e)', () => {
     measure_type: 'GAS',
   };
 
+  beforeAll(async () => {
+    await mongoose.connect(MONGODB_CONNECTION_URI);
+    await mongoose.connection.dropDatabase();
+  });
+
   beforeEach(async () => {
+    const collections = await mongoose.connection.listCollections();
+
+    for (const { name } of collections) {
+      await mongoose.connection.collection(name).deleteMany({});
+    }
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -29,21 +42,49 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('uploads image successfully', () => {
+  it('uploads image successfully', async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    })
+      .overrideProvider('GoogleAIFileManager')
+      .useValue({
+        uploadFile() {
+          return Promise.resolve({
+            file: { mimeType: '', uri: 'https://example.com' },
+          });
+        },
+      })
+      .overrideProvider('GenerativeModel')
+      .useValue({
+        generateContent() {
+          return {
+            response: {
+              text: () => '1234',
+            },
+          };
+        },
+      })
+      .compile();
+
+    const app = moduleFixture.createNestApplication();
+    await app.init();
+
     return request(app.getHttpServer())
-      .post('/')
+      .post('/upload')
       .send(bodySample)
       .expect(200)
-      .expect({
-        image_url: '',
-        measure_uuid: '',
-        measure_value: 0,
+      .expect((res) => {
+        expect(res.body).toStrictEqual({
+          image_url: 'https://example.com',
+          measure_uuid: expect.any(String),
+          measure_value: 1234,
+        });
       });
   });
 
   it('fails to parse image base64', () => {
     return request(app.getHttpServer())
-      .post('/')
+      .post('/upload')
       .send({ ...bodySample, image: 'non base64 string' })
       .expect(400)
       .expect({
@@ -54,7 +95,7 @@ describe('AppController (e2e)', () => {
 
   it('fails to parse measure_type', () => {
     return request(app.getHttpServer())
-      .post('/')
+      .post('/upload')
       .send({ ...bodySample, measure_type: 'invalid' })
       .expect(400)
       .expect({
@@ -66,7 +107,7 @@ describe('AppController (e2e)', () => {
 
   it('fails to parse measure_datetime', () => {
     return request(app.getHttpServer())
-      .post('/')
+      .post('/upload')
       .send({ ...bodySample, measure_datetime: 'invalid' })
       .expect(400)
       .expect({

@@ -1,17 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   GoogleAIFileManager,
   UploadFileResponse,
 } from '@google/generative-ai/server';
 import * as path from 'node:path';
 import { IMAGE_EXTENSIONS_TO_MIME_TYPE } from './constants';
-import {
-  GenerateContentResult,
-  GenerativeModel,
-  GoogleGenerativeAI,
-} from '@google/generative-ai';
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
+import { GenerateContentResult, GenerativeModel } from '@google/generative-ai';
 
 type GeminiQuery = {
   mimeType: string;
@@ -21,17 +15,12 @@ type GeminiQuery = {
 
 @Injectable()
 export class GeminiService {
-  private fileManager: GoogleAIFileManager;
-  private model: GenerativeModel;
-
-  constructor() {
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-    this.fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
-    this.model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-pro',
-    });
-  }
+  constructor(
+    @Inject('GoogleAIFileManager')
+    private readonly fileManager: GoogleAIFileManager,
+    @Inject('GenerativeModel')
+    private readonly model: GenerativeModel,
+  ) {}
 
   async uploadImage(filePath: string): Promise<UploadFileResponse> {
     const extension = path.extname(filePath);

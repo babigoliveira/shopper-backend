@@ -2,8 +2,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-
-const PORT = parseInt(process.env.PORT ?? '3000');
+import { PORT } from './env';
 
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule);

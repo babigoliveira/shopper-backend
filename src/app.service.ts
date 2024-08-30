@@ -9,11 +9,11 @@ import {
   IMAGE_MIME_TYPES_TO_EXTENSION,
   MIME_TYPES_SIGNATURES,
 } from './constants';
-import { MeasureService } from './infra/measure/measure.service';
 import { ConfirmMeasureRequestDto } from './domain/dtos/confirm-measure.dto';
 import { DuplicatedMeasureAttemptError } from './domain/errors';
 import { format } from 'date-fns';
 import { MEASURE_YEAR_MONTH_FORMAT } from './domain/schemas/measure.schema';
+import { MeasureService } from './measure/measure.service';
 
 @Injectable()
 export class AppService {
