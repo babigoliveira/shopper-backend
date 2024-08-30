@@ -62,7 +62,7 @@ export class AppService {
     );
   }
 
-  async filterMeasures(customerCode: string, measureType: MeasureType) {
+  async filterMeasures(customerCode: string, measureType?: MeasureType) {
     return this.measureService.filterMeasures(customerCode, measureType);
   }
 

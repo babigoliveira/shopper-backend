@@ -104,7 +104,7 @@ export class AppController {
     };
   }
 
-  @Get(':customer_code/list')
+  @Get('/:customer_code/list')
   @ApiOkResponse({
     type: FilterMeasureResponseDto,
     example: {

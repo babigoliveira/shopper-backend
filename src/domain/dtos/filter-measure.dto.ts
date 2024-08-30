@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { MEASURE_TYPES, MeasureType } from './image-upload.dto';
 
 export class FilterMeasureRequestDto {
-  @ApiProperty({ enum: MEASURE_TYPES })
-  measure_type: MeasureType;
+  @ApiProperty({ enum: MEASURE_TYPES, required: false })
+  measure_type?: MeasureType;
 }
 
 class MeasureResponseDto {

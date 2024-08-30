@@ -7,8 +7,12 @@ import { MONGODB_CONNECTION_URI } from '../src/env';
 import { MeasureService } from '../src/measure/measure.service';
 import { ErrorResponseDto } from '../src/domain/dtos/error-response.dto';
 import { faker } from '@faker-js/faker';
+import { MEASURE_TYPES } from '../src/domain/dtos/image-upload.dto';
 
-jest.mock('fs');
+jest.mock('node:fs', () => ({
+  readFileSync: jest.fn().mockReturnValue(''),
+  writeFileSync: jest.fn(),
+}));
 
 const encodedBase64SquareImage =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABQAAAALQAQMAAAD1s0' +
@@ -224,5 +228,98 @@ describe('AppController (e2e)', () => {
 
     expect(foundMeasure?.validated).toBe(true);
     expect(foundMeasure?.measure_value).toBe(100);
+  });
+
+  test('filter measure invalid measure type', () => {
+    return request(app.getHttpServer())
+      .get('/<customer-code>/list')
+      .query({
+        measure_type: 'INVALID',
+      })
+      .expect(400)
+      .expect({
+        error_code: 'INVALID_DATA',
+        error_description: 'Tipo de medição não permitida',
+      });
+  });
+
+  test('zero measures found', () => {
+    return request(app.getHttpServer())
+      .get('/<customer-code>/list')
+      .query({
+        measure_type: 'WATER',
+      })
+      .expect(404)
+      .expect({
+        error_code: 'MEASURES_NOT_FOUND',
+        error_description: 'Nenhuma leitura encontrada',
+      });
+  });
+
+  it('filters all measures', async () => {
+    const createdMeasures = await Promise.all(
+      MEASURE_TYPES.map((measureType) =>
+        measureService.create({
+          customer_code: '123',
+          measure_type: measureType,
+          measure_datetime: new Date(),
+          image_url: faker.internet.url(),
+          measure_value: 0,
+        }),
+      ),
+    );
+
+    return request(app.getHttpServer())
+      .get('/123/list')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.measures).toHaveLength(MEASURE_TYPES.length);
+
+        expect(res.body).toStrictEqual({
+          customer_code: '123',
+          measures: createdMeasures.map((measure) => ({
+            measure_uuid: measure.measure_uuid,
+            measure_datetime: measure.measure_datetime.toISOString(),
+            measure_type: measure.measure_type,
+            has_confirmed: measure.validated,
+            image_url: measure.image_url,
+          })),
+        });
+      });
+  });
+
+  it('filters WATER measures', async () => {
+    const createdMeasures = await Promise.all(
+      MEASURE_TYPES.map((measureType) =>
+        measureService.create({
+          customer_code: '123',
+          measure_type: measureType,
+          measure_datetime: new Date(),
+          image_url: faker.internet.url(),
+          measure_value: 0,
+        }),
+      ),
+    );
+
+    return request(app.getHttpServer())
+      .get('/123/list')
+      .query({ measure_type: 'WATER' })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.measures).toHaveLength(1);
+
+        expect(res.body).toStrictEqual({
+          customer_code: '123',
+          measures: createdMeasures
+            .filter((m) => m.measure_type == 'WATER')
+            .map((measure) => ({
+              measure_uuid: measure.measure_uuid,
+              measure_datetime: measure.measure_datetime.toISOString(),
+              measure_type: measure.measure_type,
+              has_confirmed: measure.validated,
+              image_url: measure.image_url,
+            })),
+        });
+      });
   });
 });
