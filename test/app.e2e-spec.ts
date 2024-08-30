@@ -151,4 +151,15 @@ describe('AppController (e2e)', () => {
         });
       });
   });
+
+  it('fails to confirm measure invalid uuid', () => {
+    return request(app.getHttpServer())
+      .patch('/confirm')
+      .send({ measure_uuid: 'invalid', confirmed_value: 0 })
+      .expect(400)
+      .expect({
+        error_code: 'INVALID_DATA',
+        error_description: 'Invalid uuid',
+      });
+  });
 });
