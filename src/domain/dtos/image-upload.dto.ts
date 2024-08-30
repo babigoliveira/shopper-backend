@@ -20,3 +20,9 @@ export class ImageUploadResponseDto {
   @ApiProperty() measure_value: number;
   @ApiProperty() measure_uuid: string;
 }
+
+export class FindMeasureFilterDto {
+  customer_code: string;
+  measure_datetime: Date;
+  measure_type: MeasureType;
+}

@@ -6,6 +6,9 @@ import * as mongoose from 'mongoose';
 import { MONGODB_CONNECTION_URI } from '../src/env';
 import { MeasureService } from '../src/measure/measure.service';
 import { ErrorResponseDto } from '../src/domain/dtos/error-response.dto';
+import { faker } from '@faker-js/faker';
+
+jest.mock('fs');
 
 const encodedBase64SquareImage =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABQAAAALQAQMAAAD1s0' +
@@ -23,6 +26,7 @@ const bodySample = {
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let measureService: MeasureService;
 
   beforeAll(async () => {
     await mongoose.connect(MONGODB_CONNECTION_URI);
@@ -44,6 +48,8 @@ describe('AppController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
+
+    measureService = moduleFixture.get(MeasureService);
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -152,7 +158,7 @@ describe('AppController (e2e)', () => {
       });
   });
 
-  it('fails to confirm measure invalid uuid', () => {
+  it('fails to confirm measure | Invalid uuid', () => {
     return request(app.getHttpServer())
       .patch('/confirm')
       .send({ measure_uuid: 'invalid', confirmed_value: 0 })
@@ -161,5 +167,62 @@ describe('AppController (e2e)', () => {
         error_code: 'INVALID_DATA',
         error_description: 'Invalid uuid',
       });
+  });
+
+  test('measure not found', () => {
+    return request(app.getHttpServer())
+      .patch('/confirm')
+      .send({ measure_uuid: faker.string.uuid(), confirmed_value: 0 })
+      .expect(404)
+      .expect({
+        error_code: 'MEASURE_NOT_FOUND',
+        error_description: 'Leitura do mês não encontrada',
+      });
+  });
+
+  test('duplicated measure', async () => {
+    const createdMeasure = await measureService.create({
+      customer_code: '123',
+      measure_type: 'WATER',
+      measure_datetime: new Date(),
+      image_url: faker.internet.url(),
+      measure_value: 0,
+    });
+
+    await measureService.confirm(createdMeasure.measure_uuid, 0);
+
+    return request(app.getHttpServer())
+      .patch('/confirm')
+      .send({ measure_uuid: createdMeasure.measure_uuid, confirmed_value: 0 })
+      .expect(409)
+      .expect({
+        error_code: 'CONFIRMATION_DUPLICATE',
+        error_description: 'Leitura do mês já realizada',
+      });
+  });
+
+  it('confirms measure successfully', async () => {
+    const createdMeasure = await measureService.create({
+      customer_code: '123',
+      measure_type: 'WATER',
+      measure_datetime: new Date(),
+      image_url: faker.internet.url(),
+      measure_value: 0,
+    });
+
+    await request(app.getHttpServer())
+      .patch('/confirm')
+      .send({ measure_uuid: createdMeasure.measure_uuid, confirmed_value: 100 })
+      .expect(200)
+      .expect({ success: true });
+
+    const foundMeasure = await measureService.findMeasure({
+      customer_code: '123',
+      measure_type: 'WATER',
+      measure_datetime: new Date(),
+    });
+
+    expect(foundMeasure?.validated).toBe(true);
+    expect(foundMeasure?.measure_value).toBe(100);
   });
 });

@@ -12,7 +12,7 @@ import {
 } from '../domain/errors';
 import { format } from 'date-fns';
 import {
-  ImageUploadRequestDto,
+  FindMeasureFilterDto,
   MeasureType,
 } from '../domain/dtos/image-upload.dto';
 
@@ -36,11 +36,11 @@ export class MeasureService {
     });
 
     if (measure == null) {
-      throw new MeasureNotFoundError(measureUuid);
+      throw new MeasureNotFoundError();
     }
 
     if (measure.validated) {
-      throw new MeasureAlreadyValidatedError(measureUuid);
+      throw new MeasureAlreadyValidatedError();
     }
 
     measure.validated = true;
@@ -55,7 +55,7 @@ export class MeasureService {
     customer_code,
     measure_type,
     measure_datetime,
-  }: ImageUploadRequestDto): Promise<Measure | null> {
+  }: FindMeasureFilterDto): Promise<Measure | null> {
     return this.measureModel.findOne({
       customer_code,
       measure_type,

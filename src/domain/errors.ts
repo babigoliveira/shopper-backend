@@ -1,12 +1,12 @@
 export class MeasureAlreadyValidatedError extends Error {
-  constructor(measureUuid: string) {
-    super(`Leitura do mês já realizada ${measureUuid}`);
+  constructor() {
+    super('Leitura do mês já realizada');
   }
 }
 
 export class MeasureNotFoundError extends Error {
-  constructor(measureUuid: string) {
-    super(`Leitura do mês não encontrada ${measureUuid}`);
+  constructor() {
+    super('Leitura do mês não encontrada');
   }
 }
 
