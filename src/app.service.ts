@@ -17,6 +17,7 @@ import {
 import { format } from 'date-fns';
 import { MEASURE_YEAR_MONTH_FORMAT } from './domain/schemas/measure.schema';
 import { MeasureService } from './measure/measure.service';
+import * as fs from 'node:fs';
 
 @Injectable()
 export class AppService {
@@ -35,7 +36,11 @@ export class AppService {
     const filePath = this.makeFilePath(image, customer_code, measure_datetime);
     this.fsService.store(filePath, image);
 
-    const uploadResponse = await this.geminiService.uploadImage(filePath);
+    const uploadResponse = await this.geminiService
+      .uploadImage(filePath)
+      .finally(() => {
+        fs.rmSync(filePath);
+      });
 
     const result = await this.geminiService.queryImageContent({
       mimeType: uploadResponse.file.mimeType,
@@ -44,8 +49,6 @@ export class AppService {
         'What is the number measured by the reader machine? ' +
         'Only give the number.',
     });
-
-    // TODO: remover imagem após upload
 
     const measure = await this.measureService.create({
       image_url: uploadResponse.file.uri,
