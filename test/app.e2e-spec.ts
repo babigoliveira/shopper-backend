@@ -50,7 +50,6 @@ describe('AppController (e2e)', () => {
 
   afterAll(async () => {
     await mongoose.connection.close();
-    await app.close();
   });
 
   beforeEach(async () => {
@@ -68,6 +67,10 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 
   it('fails to parse image base64', () => {
@@ -132,7 +135,7 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    return request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/upload')
       .send(bodySample)
       .expect(409)
@@ -140,6 +143,8 @@ describe('AppController (e2e)', () => {
         error_code: 'DOUBLE_REPORT',
         error_description: 'Leitura do mês já realizada',
       } as ErrorResponseDto);
+
+    await app.close();
   });
 
   it.each([
@@ -174,7 +179,7 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    return request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/upload')
       .send({ ...bodySample, image })
       .expect(200)
@@ -185,6 +190,8 @@ describe('AppController (e2e)', () => {
           measure_value: 1234,
         });
       });
+
+    await app.close();
   });
 
   it('should fail to upload invalid', () => {
