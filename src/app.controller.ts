@@ -17,7 +17,7 @@ import {
   ImageUploadRequestDto,
   ImageUploadResponseDto,
 } from './domain/dtos/image-upload.dto';
-import { ZodValidationPipe } from './zod-validation-pipe';
+import { ZodValidationPipe } from './infra/zod-validation-pipe';
 import { createImageUploadRequestDtoSchema } from './domain/validators/image-upload-validators';
 import {
   ApiBadRequestResponse,
