@@ -14,15 +14,26 @@ jest.mock('node:fs', () => ({
   writeFileSync: jest.fn(),
 }));
 
-const encodedBase64SquareImage =
+const ENCODED_BASE64_SQUARE_IMAGE =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABQAAAALQAQMAAAD1s0' +
   '8VAAAAA1BMVEX/AAAZ4gk3AAAAh0lEQVR42u3BMQEAAADCoPVPbQlPoAAAAAAAAA' +
   'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
   'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
   'AAAAAAAAAAAAB4GsTfAAGc95RKAAAAAElFTkSuQmCC';
 
+const ENCODED_BASE64_SQUARE_IMAGE_WITHOUT_MIME_TYPE =
+  'iVBORw0KGgoAAAANSUhEUgAABQAAAALQAQMAAAD1s0' +
+  '8VAAAAA1BMVEX/AAAZ4gk3AAAAh0lEQVR42u3BMQEAAADCoPVPbQlPoAAAAAAAAA' +
+  'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+  'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+  'AAAAAAAAAAAAB4GsTfAAGc95RKAAAAAElFTkSuQmCC';
+
+const ENCODED_BASE64_BMP_IMAGE =
+  'Qk1GAAAAAAAAADYAAAAoAAAAAgAAAAIAAAABAAEAAAAAAEABAA' +
+  'AAAAAAAAAAAAAAAAAAAAAA//8AAAAA////AAAAAAAAAAD//wAA';
+
 const bodySample = {
-  image: encodedBase64SquareImage,
+  image: ENCODED_BASE64_SQUARE_IMAGE,
   customer_code: 'customer_code',
   measure_datetime: new Date().toISOString(),
   measure_type: 'GAS',
@@ -67,6 +78,17 @@ describe('AppController (e2e)', () => {
       .expect({
         error_code: 'INVALID_DATA',
         error_description: 'Invalid base64 image string',
+      });
+  });
+
+  it('fails to upload image with unknown mime type signature', () => {
+    return request(app.getHttpServer())
+      .post('/upload')
+      .send({ ...bodySample, image: ENCODED_BASE64_BMP_IMAGE })
+      .expect(400)
+      .expect({
+        error_code: 'UNSUPPORTED_IMAGE_TYPE',
+        error_description: "Unsupported image mime type 'unknown'",
       });
   });
 
@@ -120,7 +142,10 @@ describe('AppController (e2e)', () => {
       } as ErrorResponseDto);
   });
 
-  it('uploads image successfully', async () => {
+  it.each([
+    ENCODED_BASE64_SQUARE_IMAGE,
+    ENCODED_BASE64_SQUARE_IMAGE_WITHOUT_MIME_TYPE,
+  ])('uploads image successfully', async (image) => {
     await app.close();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -151,7 +176,7 @@ describe('AppController (e2e)', () => {
 
     return request(app.getHttpServer())
       .post('/upload')
-      .send(bodySample)
+      .send({ ...bodySample, image })
       .expect(200)
       .expect((res) => {
         expect(res.body).toStrictEqual({
@@ -162,7 +187,18 @@ describe('AppController (e2e)', () => {
       });
   });
 
-  it('fails to confirm measure | Invalid uuid', () => {
+  it('should fail to upload invalid', () => {
+    return request(app.getHttpServer())
+      .patch('/confirm')
+      .send({ measure_uuid: 'invalid', confirmed_value: 0 })
+      .expect(400)
+      .expect({
+        error_code: 'INVALID_DATA',
+        error_description: 'Invalid uuid',
+      });
+  });
+
+  it('fails to upload image with unsupported mime type', () => {
     return request(app.getHttpServer())
       .patch('/confirm')
       .send({ measure_uuid: 'invalid', confirmed_value: 0 })

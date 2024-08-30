@@ -21,3 +21,9 @@ export class MeasuresNotFoundError extends Error {
     super('Nenhuma leitura encontrada');
   }
 }
+
+export class UnsupportedImageType extends Error {
+  constructor(mimeType: string) {
+    super(`Unsupported image mime type '${mimeType || 'unknown'}'`);
+  }
+}

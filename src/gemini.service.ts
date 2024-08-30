@@ -24,11 +24,7 @@ export class GeminiService {
 
   async uploadImage(filePath: string): Promise<UploadFileResponse> {
     const extension = path.extname(filePath);
-    const mimeType = IMAGE_EXTENSIONS_TO_MIME_TYPE.get(extension);
-
-    if (mimeType === undefined) {
-      throw new Error(`Unsupported mimeType for file '${filePath}'`);
-    }
+    const mimeType = IMAGE_EXTENSIONS_TO_MIME_TYPE.get(extension)!;
 
     const uploadResponse = await this.fileManager.uploadFile(filePath, {
       mimeType,

@@ -10,7 +10,10 @@ import {
   MIME_TYPES_SIGNATURES,
 } from './constants';
 import { ConfirmMeasureRequestDto } from './domain/dtos/confirm-measure.dto';
-import { DuplicatedMeasureAttemptError } from './domain/errors';
+import {
+  DuplicatedMeasureAttemptError,
+  UnsupportedImageType,
+} from './domain/errors';
 import { format } from 'date-fns';
 import { MEASURE_YEAR_MONTH_FORMAT } from './domain/schemas/measure.schema';
 import { MeasureService } from './measure/measure.service';
@@ -73,6 +76,11 @@ export class AppService {
   ) {
     const mimeType = this.getMimeType(image);
     const extension = IMAGE_MIME_TYPES_TO_EXTENSION.get(mimeType);
+
+    if (extension === undefined) {
+      throw new UnsupportedImageType(mimeType);
+    }
+
     const timestamp = format(measureDatetime, MEASURE_YEAR_MONTH_FORMAT);
     const filePath = `./${customerCode}_${timestamp}${extension}`;
     return filePath;

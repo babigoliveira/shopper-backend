@@ -5,6 +5,7 @@ import {
   MeasureAlreadyValidatedError,
   MeasureNotFoundError,
   MeasuresNotFoundError,
+  UnsupportedImageType,
 } from '../domain/errors';
 
 export const getExceptionFilters = (): (new (
@@ -21,6 +22,8 @@ export const getExceptionFilters = (): (new (
   registerExceptionFilter(DuplicatedMeasureAttemptError, 409, 'DOUBLE_REPORT'),
 
   registerExceptionFilter(MeasuresNotFoundError, 404, 'MEASURES_NOT_FOUND'),
+
+  registerExceptionFilter(UnsupportedImageType, 400, 'UNSUPPORTED_IMAGE_TYPE'),
 ];
 
 const registerExceptionFilter = (
