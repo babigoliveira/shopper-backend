@@ -23,14 +23,6 @@ export class AppService {
     private readonly measureService: MeasureService,
   ) {}
 
-  async ensureMeasureDoesNotExists(uploadRequest: ImageUploadRequestDto) {
-    const measure = await this.measureService.findMeasure(uploadRequest);
-
-    if (measure != null) {
-      throw new DuplicatedMeasureAttemptError();
-    }
-  }
-
   async uploadImageAndQueryGeminiReading(uploadRequest: ImageUploadRequestDto) {
     const { customer_code, image, measure_datetime, measure_type } =
       uploadRequest;
@@ -63,6 +55,17 @@ export class AppService {
     return measure;
   }
 
+  confirmMeasure(confirmDto: ConfirmMeasureRequestDto) {
+    return this.measureService.confirm(
+      confirmDto.measure_uuid,
+      confirmDto.confirmed_value,
+    );
+  }
+
+  async filterMeasures(customerCode: string, measureType: MeasureType) {
+    return this.measureService.filterMeasures(customerCode, measureType);
+  }
+
   private makeFilePath(
     image: string,
     customerCode: string,
@@ -91,14 +94,13 @@ export class AppService {
     return '';
   }
 
-  confirmMeasure(confirmDto: ConfirmMeasureRequestDto) {
-    return this.measureService.confirm(
-      confirmDto.measure_uuid,
-      confirmDto.confirmed_value,
-    );
-  }
+  private async ensureMeasureDoesNotExists(
+    uploadRequest: ImageUploadRequestDto,
+  ) {
+    const measure = await this.measureService.findMeasure(uploadRequest);
 
-  async filterMeasures(customerCode: string, measureType: MeasureType) {
-    return this.measureService.filterMeasures(customerCode, measureType);
+    if (measure != null) {
+      throw new DuplicatedMeasureAttemptError();
+    }
   }
 }
