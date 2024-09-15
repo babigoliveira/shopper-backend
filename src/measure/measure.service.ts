@@ -55,11 +55,13 @@ export class MeasureService {
     customer_code,
     measure_type,
     measure_datetime,
-  }: FindMeasureFilterDto): Promise<Measure | null> {
+    validated,
+  }: FindMeasureFilterDto & { validated: boolean }): Promise<Measure | null> {
     return this.measureModel.findOne({
       customer_code,
       measure_type,
       measure_year_month: format(measure_datetime, MEASURE_YEAR_MONTH_FORMAT),
+      validated,
     });
   }
 

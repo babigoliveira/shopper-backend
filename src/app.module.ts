@@ -7,7 +7,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { GoogleAIFileManager } from '@google/generative-ai/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { MeasureModule } from './measure/measure.module';
-import { GEMINI_API_KEY, MONGODB_CONNECTION_URI } from './env';
+import {
+  GEMINI_API_KEY,
+  GEMINI_GENERATIVE_MODEL_VERSION,
+  MONGODB_CONNECTION_URI,
+} from './env';
 
 const googleAIFileManagerFactory = {
   provide: 'GoogleAIFileManager',
@@ -19,7 +23,7 @@ const generativeModelFactory = {
   useFactory: () => {
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     return genAI.getGenerativeModel({
-      model: 'gemini-1.5-pro',
+      model: GEMINI_GENERATIVE_MODEL_VERSION,
     });
   },
 };

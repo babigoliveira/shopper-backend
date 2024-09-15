@@ -42,8 +42,3 @@ export class Measure {
 }
 
 export const MeasureSchema = SchemaFactory.createForClass(Measure);
-
-MeasureSchema.index(
-  { customer_code: 1, measure_type: 1, measure_year_month: 1 },
-  { unique: true },
-);

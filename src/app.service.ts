@@ -108,7 +108,10 @@ export class AppService {
   private async ensureMeasureDoesNotExists(
     uploadRequest: ImageUploadRequestDto,
   ) {
-    const measure = await this.measureService.findMeasure(uploadRequest);
+    const measure = await this.measureService.findMeasure({
+      ...uploadRequest,
+      validated: true,
+    });
 
     if (measure != null) {
       throw new DuplicatedMeasureAttemptError();
