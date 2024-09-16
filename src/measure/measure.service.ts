@@ -56,13 +56,18 @@ export class MeasureService {
     measure_type,
     measure_datetime,
     validated,
-  }: FindMeasureFilterDto & { validated: boolean }): Promise<Measure | null> {
-    return this.measureModel.findOne({
+  }: FindMeasureFilterDto & { validated?: boolean }): Promise<Measure | null> {
+    const filter: any = {
       customer_code,
       measure_type,
       measure_year_month: format(measure_datetime, MEASURE_YEAR_MONTH_FORMAT),
-      validated,
-    });
+    };
+
+    if (validated !== undefined) {
+      filter.validated = validated;
+    }
+
+    return this.measureModel.findOne(filter);
   }
 
   async filterMeasures(customerCode: string, measureType?: MeasureType) {
